@@ -21,11 +21,13 @@ import Documents from './pages/Documents'; // Import the Documents component
 import Deliverables from './pages/Deliverables'; // Import the Deliverables component
 import AddDeliverablesAD from './pages/Add_deliverables_AD'; // Corrected import to PascalCase and updated path
 import Login from './pages/Login';
+import { AuthProvider } from './pages/auth';
 
 function App() {
   return (
     <Router>
       <Suspense fallback={<div>Loading...</div>}>
+      <AuthProvider>
         <Routes>
           {/* Route without layout */}
           <Route path="/" element={<Login />} />
@@ -162,6 +164,7 @@ function App() {
             }
           />
         </Routes>
+      </AuthProvider>
       </Suspense>
     </Router>
   );

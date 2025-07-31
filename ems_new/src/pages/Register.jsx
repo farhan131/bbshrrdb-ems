@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import api from '../services/api';
 const Register = () => {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -44,12 +45,28 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      alert('Registration submitted successfully!');
+    if (!validateForm()) return;
+
+    try {
+      const response = await api.post('/auth/register', {
+        name: formData.fullName,
+        cnic: formData.cnic,
+        email: formData.email,
+        mobile: formData.mobile,
+        password: formData.password,
+        role: 'employee', // or 'admin' based on who is registering
+      });
+
+      alert("Registration successful!");
+      // optionally navigate to login page
+    } catch (error) {
+      const errorMsg = error.response?.data?.error || "Registration failed";
+      alert(errorMsg);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-100 via-white to-blue-200 flex flex-col">
