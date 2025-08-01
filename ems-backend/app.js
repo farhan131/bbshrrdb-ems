@@ -36,6 +36,7 @@ app.use("/api/messages", messageRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/showCause", showCauseRoutes);
 app.use("/api/transferPosting", transferPostingRoutes);
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 // Add more here...
 
 // Sync DB

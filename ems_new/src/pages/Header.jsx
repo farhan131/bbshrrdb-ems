@@ -1,8 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
+import { AuthContext } from '../pages/auth'; // adjust path if needed
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const [systemTime, setSystemTime] = useState(new Date().toLocaleTimeString());
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -16,11 +20,18 @@ const Header = () => {
     setMenuOpen(!menuOpen);
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/'); // redirect to login
+  };
+
   return (
     <header className="bg-white shadow p-4 flex justify-between items-center sticky top-0 z-10">
       <div className="flex items-center">
-        <span className="text-gray-500">Welcome, Admin</span>
-        <h2 className="text-lg font-semibold ml-2" id="admin-name">Admin Name</h2>
+        <span className="text-gray-500">Welcome, {user?.role || 'User'}</span>
+        <h2 className="text-lg font-semibold ml-2" id="admin-name">
+          {user?.fullName || user?.email || 'Loading...'}
+        </h2>
       </div>
       <div className="flex items-center space-x-4">
         <span
@@ -76,7 +87,7 @@ const Header = () => {
                   id="logoutBtn"
                   className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   role="menuitem"
-                  onClick={() => alert('Logging out...')}
+                  onClick={handleLogout}
                 >
                   Logout
                 </button>

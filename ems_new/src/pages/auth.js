@@ -1,5 +1,5 @@
 // src/auth.js
-import { createContext, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import api from '../services/api';
 
 
@@ -7,7 +7,26 @@ const AuthContext = createContext();
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('token') || null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (token) {
+        try {
+          const me = await api.get('/auth/me', {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          setUser(me.data);
+        } catch (err) {
+          console.error("Token invalid or expired");
+          setToken(null);
+          localStorage.removeItem('token');
+        }
+      }
+    };
+    fetchUser();
+  }, [token]);
+
 
   const login = async (email, password) => {
     const response = await api.post('/auth/login', { email, password });

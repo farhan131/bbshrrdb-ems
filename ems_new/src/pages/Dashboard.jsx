@@ -3,6 +3,14 @@ import Header from './Header';
 import AttendanceTable from './AttendanceTable';
 import SearchFilterBar from './SearchFilterBar';
 
+import {
+  fetchDashboardStats,
+  fetchUpcomingTasks,
+  fetchAnnouncements,
+  fetchUsersList,
+} from '../services/dashboardApi';
+
+
 const Dashboard = () => {
   const [time, setTime] = useState(new Date());
 
@@ -10,6 +18,34 @@ const Dashboard = () => {
     const interval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
+
+  const [stats, setStats] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
+  const [users, setUsers] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsRes, tasksRes, annRes, usersRes] = await Promise.all([
+          fetchDashboardStats(),
+          fetchUpcomingTasks(),
+          fetchAnnouncements(),
+          fetchUsersList(),
+        ]);
+
+        setStats(statsRes.data);
+        setTasks(tasksRes.data);
+        setAnnouncements(annRes.data);
+        setUsers(usersRes.data);
+      } catch (err) {
+        console.error('Dashboard data error:', err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
 
   return (
     <div className="bg-gray-100 text-gray-900 min-h-screen flex">
@@ -21,12 +57,7 @@ const Dashboard = () => {
           <section aria-labelledby="stats-heading" className="mb-6">
             <h3 id="stats-heading" className="text-lg font-semibold mb-4">Your Stats</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              {[
-                { label: 'Days Worked', value: 125, color: 'text-blue-600', description: 'This Year' },
-                { label: 'Leave Balance', value: 15, color: 'text-green-600', description: 'Days Remaining' },
-                { label: 'Pending Tasks', value: 8, color: 'text-yellow-600', description: 'Due This Week' },
-                { label: 'Team Members', value: 12, color: 'text-purple-600', description: 'In Your Department' },
-              ].map((stat) => (
+              {stats.map((stat) => (
                 <div className="bg-white p-6 rounded-lg shadow" key={stat.label}>
                   <h4 className="text-sm text-gray-500">{stat.label}</h4>
                   <p className={`text-2xl font-bold ${stat.color}`}>{stat.value}</p>
@@ -41,11 +72,7 @@ const Dashboard = () => {
             <div className="col-span-1 bg-white p-6 rounded-lg shadow">
               <h3 className="text-lg font-semibold mb-4">Upcoming Tasks</h3>
               <ul className="space-y-4">
-                {[
-                  { task: 'Project Review', due: 'June 07, 2025', status: 'Pending', color: 'text-yellow-500' },
-                  { task: 'Team Meeting', due: 'June 08, 2025', status: 'Scheduled', color: 'text-green-500' },
-                  { task: 'Report Submission', due: 'June 10, 2025', status: 'Overdue', color: 'text-red-500' },
-                ].map((item) => (
+                {tasks.map((item) => (
                   <li className="flex justify-between items-center" key={item.task}>
                     <div>
                       <p className="font-medium">{item.task}</p>
@@ -60,18 +87,12 @@ const Dashboard = () => {
             <div className="col-span-1 md:col-span-2 bg-white p-6 rounded-lg shadow">
               <h3 className="text-lg font-semibold mb-4">Recent Announcements</h3>
               <ul className="space-y-4">
-                <li>
-                  <p className="font-semibold">Office Closed on July 4th</p>
-                  <p className="text-sm text-gray-600">Office will be closed due to Independence Day holiday.</p>
-                </li>
-                <li>
-                  <p className="font-semibold">New Health Benefits Plan</p>
-                  <p className="text-sm text-gray-600">Check your email for upcoming health benefits plan.</p>
-                </li>
-                <li>
-                  <p className="font-semibold">Quarterly Town Hall Meeting</p>
-                  <p className="text-sm text-gray-600">Scheduled on June 20th at 10 AM in main conference room.</p>
-                </li>
+                {announcements.map((item, index) => (
+                  <li key={index}>
+                    <p className="font-semibold">{item.title}</p>
+                    <p className="text-sm text-gray-600">{item.message}</p>
+                  </li>
+                ))}
               </ul>
             </div>
           </section>
@@ -89,12 +110,14 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td className="px-6 py-4">1</td>
-                  <td className="px-6 py-4">John Doe</td>
-                  <td className="px-6 py-4">john@example.com</td>
-                  <td className="px-6 py-4">Manager</td>
-                </tr>
+                {users.map((user) => (
+                  <tr key={user.id}>
+                    <td className="px-6 py-4">{user.id}</td>
+                    <td className="px-6 py-4">{user.name}</td>
+                    <td className="px-6 py-4">{user.email}</td>
+                    <td className="px-6 py-4">{user.role}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </section>

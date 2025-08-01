@@ -20,3 +20,11 @@ exports.authorize = (...roles) => (req, res, next) => {
   }
   next();
 };
+
+exports.authorizeSelfOrAdmin = (req, res, next) => {
+  const userId = parseInt(req.params.id);
+  if (req.user.role === "admin" || req.user.id === userId) {
+    return next();
+  }
+  return res.status(403).json({ error: "Forbidden" });
+};

@@ -1,17 +1,19 @@
 import React, { useState, useContext } from 'react';
 import { AuthContext } from './auth';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useContext(AuthContext);
   const [error, setError] = useState('');
+  const navigate = useNavigate(); // <-- added
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
       await login(username.trim(), password);
+      navigate('/dashboard'); // <-- redirect on success
     } catch (err) {
       setError('Invalid username or password');
     }
