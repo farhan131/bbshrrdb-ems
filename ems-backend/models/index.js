@@ -62,12 +62,19 @@ TransferPosting.belongsTo(Employee, { foreignKey: "employeeId" });
 const syncDb = async () => {
   try {
     await sequelize.authenticate();
-    console.log("DB connected...");
-    // await sequelize.sync({ force: true });
-    await sequelize.sync({ alter: true });
-    console.log("Models synced...");
+    console.log("✅ DB connected...");
+
+    // TEMPORARY: Clean schema to remove excessive indexes
+    if (process.env.RESET_DB === 'true') {
+      console.warn("⚠️ RESET_DB is enabled. Dropping and recreating all tables...");
+      await sequelize.sync({ force: true }); // drop and recreate all tables
+      console.log("✅ All tables dropped and recreated.");
+    } else {
+      await sequelize.sync({ alter: true }); // normal sync in dev mode
+      console.log("✅ Models synced...");
+    }
   } catch (err) {
-    console.error("DB sync error:", err);
+    console.error("❌ DB sync error:", err);
   }
 };
 
@@ -77,4 +84,13 @@ module.exports = {
   Employee,
   User,
   Deliverable,
+  Attendance,
+  Document,
+  Explanation,
+  Leave,
+  Message,
+  ShowCause,
+  Task,
+  // Training,
+  TransferPosting
 };

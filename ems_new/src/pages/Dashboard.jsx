@@ -2,50 +2,44 @@ import React, { useEffect, useState } from 'react';
 import Header from './Header';
 import AttendanceTable from './AttendanceTable';
 import SearchFilterBar from './SearchFilterBar';
-
-import {
-  fetchDashboardStats,
-  fetchUpcomingTasks,
-  fetchAnnouncements,
-  fetchUsersList,
-} from '../services/dashboardApi';
-
+import axios from '../utils/api'; // assumes you have a preconfigured Axios instance
 
 const Dashboard = () => {
   const [time, setTime] = useState(new Date());
+  const [stats, setStats] = useState([]);
+  const [tasks, setTasks] = useState([]);
+  const [announcements, setAnnouncements] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [attendance, setAttendance] = useState([]);
 
   useEffect(() => {
     const interval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  const [stats, setStats] = useState([]);
-  const [tasks, setTasks] = useState([]);
-  const [announcements, setAnnouncements] = useState([]);
-  const [users, setUsers] = useState([]);
-
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const [statsRes, tasksRes, annRes, usersRes] = await Promise.all([
-          fetchDashboardStats(),
-          fetchUpcomingTasks(),
-          fetchAnnouncements(),
-          fetchUsersList(),
+        const [statsRes, tasksRes, annRes, usersRes, attendanceRes] = await Promise.all([
+          axios.get('/dashboard/stats'),
+          axios.get('/dashboard/tasks'),
+          axios.get('/dashboard/announcements'),
+          axios.get('/dashboard/users'),
+          axios.get('/dashboard/attendance'),
         ]);
 
         setStats(statsRes.data);
         setTasks(tasksRes.data);
         setAnnouncements(annRes.data);
         setUsers(usersRes.data);
-      } catch (err) {
-        console.error('Dashboard data error:', err);
+        setAttendance(attendanceRes.data);
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
       }
     };
 
-    fetchData();
+    fetchDashboardData();
   }, []);
-
 
   return (
     <div className="bg-gray-100 text-gray-900 min-h-screen flex">
@@ -87,10 +81,10 @@ const Dashboard = () => {
             <div className="col-span-1 md:col-span-2 bg-white p-6 rounded-lg shadow">
               <h3 className="text-lg font-semibold mb-4">Recent Announcements</h3>
               <ul className="space-y-4">
-                {announcements.map((item, index) => (
-                  <li key={index}>
+                {announcements.map((item, idx) => (
+                  <li key={idx}>
                     <p className="font-semibold">{item.title}</p>
-                    <p className="text-sm text-gray-600">{item.message}</p>
+                    <p className="text-sm text-gray-600">{item.description}</p>
                   </li>
                 ))}
               </ul>
@@ -127,7 +121,7 @@ const Dashboard = () => {
             <h3 className="text-lg font-semibold mb-4">Attendance</h3>
             <SearchFilterBar />
             <div className="mt-4">
-              <AttendanceTable />
+              <AttendanceTable records={attendance} />
             </div>
           </section>
         </main>

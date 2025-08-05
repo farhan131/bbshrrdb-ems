@@ -1,5 +1,6 @@
-const Attendance = require("../models/attendance.model");
+
 const { Op } = require("sequelize");
+const { Attendance } = require("../models");
 
 exports.markLogin = async (req, res) => {
   const { id } = req.user;

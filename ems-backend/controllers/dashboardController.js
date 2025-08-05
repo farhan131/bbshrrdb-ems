@@ -7,21 +7,21 @@ exports.getStats = async (req, res) => {
 
   try {
     if (user.role === 'employee') {
-      const daysWorked = await Attendance.count({ where: { userId: user.id } });
+      const daysWorked = await Attendance.count({ where: { employeeId: user.id } });
       const leaveBalance = 15; // Assume fixed for now or fetch from user table
-      const pendingTasks = await Task.count({ where: { userId: user.id, status: 'pending' } });
-      const teamMembers = await User.count({ where: { department: user.department } });
+      const pendingTasks = await Task.count({ where: { assignedTo: user.id, status: 'pending' } });
+      // const teamMembers = await User.count({ where: { department: user.department } });
 
-      return res.json({ daysWorked, leaveBalance, pendingTasks, teamMembers });
+      return res.json({ daysWorked, leaveBalance, pendingTasks/* , teamMembers */ });
     }
 
     if (user.role === 'admin') {
       const totalEmployees = await User.count({ where: { role: 'employee' } });
       const tasksAssigned = await Task.count();
       const pendingLeaves = await Leave.count({ where: { status: 'pending' } });
-      const departments = await User.aggregate('department', 'count', { distinct: true });
+      // const departments = await User.aggregate('department', 'count', { distinct: true });
 
-      return res.json({ totalEmployees, tasksAssigned, pendingLeaves, departments });
+      return res.json({ totalEmployees, tasksAssigned, pendingLeaves/* , departments  */});
     }
   } catch (err) {
     console.error(err);
@@ -37,11 +37,13 @@ exports.getUpcomingTasks = async (req, res) => {
     const tasks = await Task.findAll({
       where,
       limit: 5,
-      order: [['dueDate', 'ASC']],
+      order: [['deadline', 'ASC']],
     });
 
     res.json(tasks);
   } catch (err) {
+    console.log(err);
+    
     res.status(500).json({ message: 'Error fetching tasks' });
   }
 };
@@ -57,6 +59,8 @@ exports.getAnnouncements = async (req, res) => {
 
     res.json(announcements);
   } catch (err) {
+    console.log(err);
+    
     res.status(500).json({ message: 'Error fetching announcements' });
   }
 };

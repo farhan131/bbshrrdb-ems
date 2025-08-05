@@ -21,6 +21,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATEONLY,
       defaultValue: DataTypes.NOW,
     },
+    status: {
+      type: DataTypes.ENUM('present', 'absent', 'leave'),
+      allowNull: false,
+      defaultValue: 'present'
+    }
   });
 
   return Attendance;
